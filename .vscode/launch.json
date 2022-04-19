@@ -6,6 +6,27 @@
     "configurations": [
         {
             "type": "java",
+            "name": "Launch ClientGUI",
+            "request": "launch",
+            "mainClass": "ClientGUI",
+            "projectName": "tywe-INET_cb53cce0"
+        },
+        {
+            "type": "java",
+            "name": "Launch ServerGUI",
+            "request": "launch",
+            "mainClass": "ServerGUI",
+            "projectName": "tywe-INET_cb53cce0"
+        },
+        {
+            "type": "java",
+            "name": "Launch Game",
+            "request": "launch",
+            "mainClass": "Game",
+            "projectName": "tywe-INET_cb53cce0"
+        },
+        {
+            "type": "java",
             "name": "Launch Game",
             "request": "launch",
             "mainClass": "Game",

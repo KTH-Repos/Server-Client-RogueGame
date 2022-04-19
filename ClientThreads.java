@@ -11,11 +11,11 @@ public class ClientThreads implements Runnable {
     private Socket socket;
     private Thread thread;
     private Socket server;
-    // private GameLogic game:
+    private Game game;
     private ClientServerController CSC;
 
-    public ClientThreads(Socket client, /* GameLogic game, */ int clientNum) {
-        // this.game = game;
+    public ClientThreads(Socket client, Game game, int clientNum) {
+        this.game = game;
         this.clientNum = clientNum;
         this.socket = client;
         CSC = new ClientServerController();

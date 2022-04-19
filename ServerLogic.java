@@ -6,7 +6,7 @@ import java.text.ParseException;
 public class ServerLogic {
     private int portValue;
     private ServerSocket socket;
-    // static GameLogic game = null;
+    static Game game = null;
 
     public ServerLogic(int portValue) {
         this.portValue = portValue;
@@ -25,9 +25,9 @@ public class ServerLogic {
             Socket client = socket.accept();
             System.out.println("Client arrived");
             System.out.println("Start thread for " + clientNum);
-            // ClientThread task = new ClientThread(Client, game, ClientNum);
+            ClientThreads task = new ClientThreads(client, game, clientNum);
             clientNum++;
-            // new Thread(task).start();
+            new Thread(task).start();
         }
     }
 

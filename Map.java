@@ -69,6 +69,9 @@ public class Map {
                 if (map[j][i].equals("@")) {
                     screen.putString(j + j, i, map[j][i], Terminal.Color.YELLOW, Terminal.Color.BLACK);
                     screen.putString(j + j + 1, i, map[j][i], Terminal.Color.YELLOW, Terminal.Color.BLACK);
+                }
+                if (map[j][i].equals("G")) {
+                    screen.putString(j + j, i, map[j][i], Terminal.Color.GREEN, Terminal.Color.BLACK);
                 } else {
                     if (Math.abs(j - pX) < 100 && Math.abs(i - pY) < 100) {
                         // Print enemies red EE

@@ -27,5 +27,13 @@ public class ClientGUI {
 
     public static void main(String[] args) {
         ClientGUI client = new ClientGUI();
+        /*
+         * try {
+         * client.TakeInputAndAct();
+         * } catch (IOException e) {
+         * //TODO: handle exception
+         * System.out.println("Buffer Reader does not exist");
+         * }
+         */
     }
 }

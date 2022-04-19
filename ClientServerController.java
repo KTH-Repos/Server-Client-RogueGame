@@ -4,10 +4,10 @@ public class ClientServerController {
 
     public void ServerToClientMessage(PrintWriter output, String message) {
         output.println(message);
-        output.flush();
+        output.flush(); // send the message immediately
     }
 
     public void ClientToClientMessage(String serverReply) {
-
+        // clientGUI.OutputSent(serverReply);
     }
 }
