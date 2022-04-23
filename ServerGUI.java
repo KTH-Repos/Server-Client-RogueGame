@@ -2,18 +2,15 @@ import java.io.*;
 
 public class ServerGUI {
     private BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-    private static int serverPort;
+    private static final int serverPort = 9000;
     private static boolean created;
     private static ServerLogic serverLogic;
 
     public ServerGUI() {
         try {
-            System.out.println("Please enter the server port: ");
-            serverPort = Integer.parseInt(br.readLine());
+            //System.out.println("Please enter the server port: ");
+           // serverPort = Integer.parseInt(br.readLine());
         } catch (NumberFormatException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (IOException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
@@ -23,7 +20,7 @@ public class ServerGUI {
         while (!created) {
             try {
                 ServerGUI server = new ServerGUI();
-                serverLogic = new ServerLogic(serverPort);
+                serverLogic = new ServerLogic();
                 serverLogic.waitForPlayers();
             } catch (IOException e) {
                 // TODO: handle exception

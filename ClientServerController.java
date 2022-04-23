@@ -1,13 +1,33 @@
-import java.io.PrintWriter;
+import java.io.IOException;
+import java.io.ObjectOutputStream;
 
 public class ClientServerController {
 
-    public void ServerToClientMessage(PrintWriter output, String message) {
-        output.println(message);
+    public void ServerToClientMessage(ObjectOutputStream output, Object map) throws IOException {
+        output.writeObject(map);
         output.flush(); // send the message immediately
     }
 
-    public void ClientToClientMessage(String serverReply) {
-        // clientGUI.OutputSent(serverReply);
+    public void ClientToClientMessage(ClientGUI clientGUI, String serverReply) {
+        clientGUI.outPutSent(serverReply);
     }
+
+    /*
+     * public void addGame(PlayerGuide playerGuide, Game game, ClientThreads thread)
+     * {
+     * game.addPlayer(playerGuide, thread);
+     * }
+     */
+
+    /*
+     * public void die(Game game, ClientThreads thread) {
+     * Player player = game.getPlayerThreadMap(thread);
+     * game.die(player);
+     * }
+     * 
+     * public void playerleft(Game game, ClientThreads thread) {
+     * Player player = game.getPlayerThreadMap(thread);
+     * game.playerleft(player);
+     * }
+     */
 }

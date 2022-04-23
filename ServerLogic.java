@@ -2,14 +2,17 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.text.ParseException;
+import com.googlecode.lanterna.TerminalFacade;
+import com.googlecode.lanterna.input.Key;
+import com.googlecode.lanterna.screen.Screen;
 
 public class ServerLogic {
-    private int portValue;
+    private final int portValue = 9000;
     private ServerSocket socket;
-    static Game game = null;
+    static Map game;
 
-    public ServerLogic(int portValue) {
-        this.portValue = portValue;
+    public ServerLogic() {
+        //this.portValue = 9000;
         try {
             socket = new ServerSocket(portValue);
             System.out.println("Server started!");
@@ -25,6 +28,7 @@ public class ServerLogic {
             Socket client = socket.accept();
             System.out.println("Client arrived");
             System.out.println("Start thread for " + clientNum);
+            game = new Map();
             ClientThreads task = new ClientThreads(client, game, clientNum);
             clientNum++;
             new Thread(task).start();

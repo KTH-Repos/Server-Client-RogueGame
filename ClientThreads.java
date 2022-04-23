@@ -3,26 +3,31 @@ import java.net.Socket;
 import java.net.SocketException;
 import java.net.UnknownHostException;
 
+import com.googlecode.lanterna.screen.Screen;
+
 public class ClientThreads implements Runnable {
 
-    private PrintWriter output;
+    private ObjectOutputStream output;
     private BufferedReader input;
     private int clientNum;
     private Socket socket;
     private Thread thread;
     private Socket server;
-    private Game game;
+    private Map map;
     private ClientServerController CSC;
 
-    public ClientThreads(Socket client, Game game, int clientNum) {
-        this.game = game;
+    public ClientThreads(Socket client, Map map, int clientNum) {
+        this.map = map;
         this.clientNum = clientNum;
         this.socket = client;
         CSC = new ClientServerController();
+        // super.setCSC(CSC);
+        // super.setGame(game);
         System.out.println(client.toString());
         try {
-            input = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-            output = new PrintWriter(new OutputStreamWriter(socket.getOutputStream()), false);
+            output = new ObjectOutputStream(socket.getOutputStream());
+            //input = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+            //output = new PrintWriter(new OutputStreamWrit(socket.getOutputStream()), true);
         } catch (IOException e) {
             // TODO Auto-generated catch block
             System.out.println("Stream not set up for client");
@@ -33,22 +38,21 @@ public class ClientThreads implements Runnable {
 
     @Override
     public void run() {
-        // TODO Auto-generated method stub
-        try {
-            for (int i = 0; i < 10; i++) {
-                outputMessage("Test to client : " + Integer.toString(clientNum));
-                System.out.println("Test to client : " + Integer.toString(clientNum));
-                Thread.sleep(5000);
-            }
-        } catch (InterruptedException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
+        //for (;;) {
+         outputMessage(map);
+         /* System.out.println("Test to client : " + Integer.toString(clientNum));
+         Thread.sleep(5000);
+         } */
 
     }
 
-    protected void outputMessage(String message) {
-        CSC.ServerToClientMessage(output, message);
+    protected void outputMessage(Map map) {
+        try {
+            CSC.ServerToClientMessage(output, map);
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
     }
 
 }

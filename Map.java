@@ -1,15 +1,16 @@
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.Serializable;
 import java.util.Scanner;
 
 import com.googlecode.lanterna.screen.Screen;
 import com.googlecode.lanterna.terminal.Terminal;
 
-public class Map {
+public class Map implements Serializable {
 
     // holds map and player/enemy data for the loaded level and handles interactions
     // on the map
-    private String map[][];
+    public String map[][];
     private int maxX;
     private int maxY;
     private int numEnemy;
@@ -111,6 +112,7 @@ public class Map {
 
     // movePlayerXXXXX() move player +- 1 space in the desired direction
     // updates the data in the player class and on the map
+
     public void movePlayerRight() {
         int pX = p1.getX();
         int pY = p1.getY();

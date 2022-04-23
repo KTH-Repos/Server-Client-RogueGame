@@ -1,6 +1,8 @@
+import java.io.Serializable;
+
 import com.googlecode.lanterna.screen.Screen;
 
-public class Enemy extends Thread {
+public class Enemy extends Thread implements Serializable {
     private int posX;
     private int posY;
     private Map map;

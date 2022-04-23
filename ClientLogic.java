@@ -4,7 +4,7 @@ import java.net.*;
 public class ClientLogic implements Runnable {
 
     private PrintWriter output;
-    private BufferedReader input;
+    private ObjectInputStream input;
     private ClientGUI clientGUI;
     private Socket socket;
     private Thread thread;
@@ -14,7 +14,7 @@ public class ClientLogic implements Runnable {
     public ClientLogic(String Name, int Port, ClientGUI clientGUI) throws IOException {
         server = new Socket(Name, Port);
         output = new PrintWriter(server.getOutputStream(), false);
-        input = new BufferedReader(new InputStreamReader(server.getInputStream()));
+        input = new ObjectInputStream(server.getInputStream());
         CSC = new ClientServerController();
         this.clientGUI = clientGUI;
         thread = new Thread(this);
@@ -35,8 +35,17 @@ public class ClientLogic implements Runnable {
 
     private void waitForServer() throws IOException, SocketException, RuntimeException {
         while (true) {
-            String serverReply = input.readLine();
-            CSC.ClientToClientMessage(serverReply);
+            Map map;
+            try {
+                map = (Map) input.readObject();
+                Game game = new Game();
+                game.start(map);
+            } catch (ClassNotFoundException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+            
+            //CSC.ClientToClientMessage(clientGUI, serverReply);
         }
     }
 

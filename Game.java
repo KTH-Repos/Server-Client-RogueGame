@@ -7,14 +7,24 @@ import com.googlecode.lanterna.screen.Screen;
 public class Game {
     // class initializes the level/map and handles player keyboard inputs
     private static Map level;
+    private static Enemy[] eList;
+    private Player player;
 
-    public static void startGame(Screen screen) throws FileNotFoundException {
+    /*
+     * public Game() {
+     * player = new Player(1, 1);
+     * 
+     * }
+     */
+    
+
+    public static void startGame(Screen screen, Map map) throws FileNotFoundException {
         // Load level
-        level = new Map();
+        level = map;
 
         // Start the enemy threads and pass them the map to manipulate
         int num = level.getNumEnemy();
-        Enemy eList[] = new Enemy[num];
+        eList = new Enemy[num];
         for (int i = 0; i < num; i++) {
             int x = level.enemyPos[i][0];
             int y = level.enemyPos[i][1];
@@ -25,55 +35,63 @@ public class Game {
         level.PrintMap(screen);
 
         // Keep reading input until user quits the game
-        boolean stop = false;
-        while (!stop) {
-            Key key = screen.readInput();
-            while (key == null) {
-                key = screen.readInput();
-            }
-            // Move around with arrow keys in normal map view escape closes the application
-            switch (key.getKind()) {
-                case Escape:
-                    stop = true;
-                    break;
-                case ArrowRight:
-                    if (validMove("right")) {
-                        level.movePlayerRight();
-                    }
-                    level.PrintMap(screen);
-                    break;
-                case ArrowLeft:
-                    if (validMove("left")) {
-                        level.movePlayerLeft();
-                    }
-                    level.PrintMap(screen);
-                    break;
+        /*
+         * boolean stop = false;
+         * while (!stop) {
+         * Key key = screen.readInput();
+         * while (key == null) {
+         * key = screen.readInput();
+         * }
+         * // Move around with arrow keys in normal map view escape closes the
+         * application
+         * switch (key.getKind()) {
+         * case Escape:
+         * stop = true;
+         * break;
+         * case ArrowRight:
+         * if (validMove("right")) {
+         * level.movePlayerRight();
+         * }
+         * level.PrintMap(screen);
+         * break;
+         * case ArrowLeft:
+         * if (validMove("left")) {
+         * level.movePlayerLeft();
+         * }
+         * level.PrintMap(screen);
+         * break;
+         * 
+         * case ArrowDown:
+         * if (validMove("down")) {
+         * level.movePlayerDown();
+         * }
+         * level.PrintMap(screen);
+         * break;
+         * 
+         * case ArrowUp:
+         * if (validMove("up")) {
+         * level.movePlayerUp();
+         * }
+         * level.PrintMap(screen);
+         * break;
+         * default:
+         * break;
+         * }
+         */
+        /*
+         * for (Enemy e : eList) {
+         * // after a player moves all the enemies try to attack
+         * // if the player is on the same space as any of them the player will be hurt
+         * e.attack();
+         * }
+         * // After the attacks check the player to see if the game is over
+         * if (level.getPlayerHealth() <= 0) {
+         * stop = true;
+         * }
+         * }
+         */
 
-                case ArrowDown:
-                    if (validMove("down")) {
-                        level.movePlayerDown();
-                    }
-                    level.PrintMap(screen);
-                    break;
-
-                case ArrowUp:
-                    if (validMove("up")) {
-                        level.movePlayerUp();
-                    }
-                    level.PrintMap(screen);
-                    break;
-            }
-
-            for (Enemy e : eList) {
-                // after a player moves all the enemies try to attack
-                // if the player is on the same space as any of them the player will be hurt
-                e.attack();
-            }
-            // After the attacks check the player to see if the game is over
-            if (level.getPlayerHealth() <= 0) {
-                stop = true;
-            }
-        }
+        movementController(screen);
 
         // stop all enemy threads so that final screen can be shown
         for (Enemy e : eList) {
@@ -118,9 +136,74 @@ public class Game {
         }
     }
 
-    public static void main(String[] args) throws FileNotFoundException {
+    public static void movementController(Screen screen) {
+        boolean stop = false;
+        while (!stop) {
+            Key key = screen.readInput();
+            while (key == null) {
+                key = screen.readInput();
+            }
+            // Move around with arrow keys in normal map view escape closes the application
+            switch (key.getKind()) {
+                case Escape:
+                    stop = true;
+                    break;
+                case ArrowRight:
+                    if (validMove("right")) {
+                        level.movePlayerRight();
+                    }
+                    level.PrintMap(screen);
+                    break;
+                case ArrowLeft:
+                    if (validMove("left")) {
+                        level.movePlayerLeft();
+                    }
+                    level.PrintMap(screen);
+                    break;
+
+                case ArrowDown:
+                    if (validMove("down")) {
+                        level.movePlayerDown();
+                    }
+                    level.PrintMap(screen);
+                    break;
+
+                case ArrowUp:
+                    if (validMove("up")) {
+                        level.movePlayerUp();
+                    }
+                    level.PrintMap(screen);
+                    break;
+                default:
+                    break;
+            }
+        }
+    }
+
+    public void start(Map map) throws FileNotFoundException {
         Screen screen = TerminalFacade.createScreen();
         screen.startScreen();
-        Game.startGame(screen);
+        Game.startGame(screen, map);
     }
+
+    /*
+     * public void addPlayer(PlayerGuide playerGuide, ClientThreads thread) {
+     * }
+     * 
+     * public void die(Player player) {
+     * }
+     * 
+     * public void playerleft(Player player) {
+     * }
+     * 
+     * public String getGoal() {
+     * return null;
+     * }
+     * 
+     * @Override
+     * public void run() {
+     * // TODO Auto-generated method stub
+     * 
+     * }
+     */
 }

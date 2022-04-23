@@ -1,8 +1,11 @@
+import java.io.FileNotFoundException;
+import java.io.Serializable;
 
-public class Player {
+public class Player implements Serializable {
     private int posX;
     private int posY;
     private int health;
+    static Map map;
 
     public Player(int posX, int posY) {
         this.posX = posX;
