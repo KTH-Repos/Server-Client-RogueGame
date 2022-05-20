@@ -6,11 +6,31 @@ public class Player implements Serializable {
     private int posY;
     private int health;
     static Map map;
+    public String name;
+    public int ClientNum;
+    public int score;
 
-    public Player(int posX, int posY) {
-        this.posX = posX;
-        this.posY = posY;
-        health = 100;
+    /*
+     * public Player(int posX, int posY) {
+     * this.posX = posX;
+     * this.posY = posY;
+     * score = 0;
+     * }
+     */
+
+    /*
+     * Constructor used to make players in Map.java
+     */
+    public Player() {
+        score = 0;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String s) {
+        name = s;
     }
 
     // Standard get and set methods for player attributes
@@ -30,18 +50,12 @@ public class Player implements Serializable {
         posY = y;
     }
 
-    public int getHealth() {
-        return health;
+    public int getScore() {
+        return score;
     }
 
-    public void setHealth(int change) {
-        // To decrease health call method with a negative integer, increase with
-        // positive
-        health += change;
-    }
-
-    public void hurtPlayer() {
-        setHealth(-10);
+    public void incScore() {
+        score++;
     }
 
 }

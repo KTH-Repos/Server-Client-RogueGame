@@ -1,209 +1,234 @@
-import java.io.FileNotFoundException;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.PrintWriter;
+import java.net.Socket;
+import java.util.Arrays;
 
-import com.googlecode.lanterna.TerminalFacade;
 import com.googlecode.lanterna.input.Key;
 import com.googlecode.lanterna.screen.Screen;
 
+/* This class represents the client. 
+*/
 public class Game {
-    // class initializes the level/map and handles player keyboard inputs
-    private static Map level;
-    private static Enemy[] eList;
-    private Player player;
+    private static final String SERVER = "localhost";
+    private static final int PORT = 9000;
+    private static BufferedReader in; // get input from server
+    private static PrintWriter out; // send output to server
+    private static Socket server; // the server
+    private static Map map; // playing field of game
+
+    public static void main(String[] args) {
+        // Create playing field of game before game starts
+        map = new Map();
+        map.loadMap();
+        map.printMap();
+
+        try {
+            server = new Socket(SERVER, PORT); // connect to server
+            gameLoop(server, map); // start game locally
+        } catch (IOException e) {
+            map.message = "Server Not Found Please Start Server and Restart Game";
+            map.printMap();
+        }
+    }
 
     /*
-     * public Game() {
-     * player = new Player(1, 1);
-     * 
-     * }
+     * Game loop that takes input from server and acts according to it
      */
-    
-
-    public static void startGame(Screen screen, Map map) throws FileNotFoundException {
-        // Load level
-        level = map;
-
-        // Start the enemy threads and pass them the map to manipulate
-        int num = level.getNumEnemy();
-        eList = new Enemy[num];
-        for (int i = 0; i < num; i++) {
-            int x = level.enemyPos[i][0];
-            int y = level.enemyPos[i][1];
-            eList[i] = new Enemy(x, y, level, screen);
-            eList[i].start();
-        }
-
-        level.PrintMap(screen);
-
-        // Keep reading input until user quits the game
-        /*
-         * boolean stop = false;
-         * while (!stop) {
-         * Key key = screen.readInput();
-         * while (key == null) {
-         * key = screen.readInput();
-         * }
-         * // Move around with arrow keys in normal map view escape closes the
-         * application
-         * switch (key.getKind()) {
-         * case Escape:
-         * stop = true;
-         * break;
-         * case ArrowRight:
-         * if (validMove("right")) {
-         * level.movePlayerRight();
-         * }
-         * level.PrintMap(screen);
-         * break;
-         * case ArrowLeft:
-         * if (validMove("left")) {
-         * level.movePlayerLeft();
-         * }
-         * level.PrintMap(screen);
-         * break;
-         * 
-         * case ArrowDown:
-         * if (validMove("down")) {
-         * level.movePlayerDown();
-         * }
-         * level.PrintMap(screen);
-         * break;
-         * 
-         * case ArrowUp:
-         * if (validMove("up")) {
-         * level.movePlayerUp();
-         * }
-         * level.PrintMap(screen);
-         * break;
-         * default:
-         * break;
-         * }
-         */
-        /*
-         * for (Enemy e : eList) {
-         * // after a player moves all the enemies try to attack
-         * // if the player is on the same space as any of them the player will be hurt
-         * e.attack();
-         * }
-         * // After the attacks check the player to see if the game is over
-         * if (level.getPlayerHealth() <= 0) {
-         * stop = true;
-         * }
-         * }
-         */
-
-        movementController(screen);
-
-        // stop all enemy threads so that final screen can be shown
-        for (Enemy e : eList) {
-            e.interrupt();
-        }
-        // wait to guarantee that all threads have stopped before printing death screen
+    private static void gameLoop(Socket server, Map map) {
+        Boolean playing = true; // true as long as game is run
+        OutputStream outstream; // used to send binary data to server
         try {
-            Thread.sleep(200);
-        } catch (InterruptedException e) {
+            // used to receive binary data from
+            in = new BufferedReader(new InputStreamReader(server.getInputStream()));
+            outstream = server.getOutputStream();
+            out = new PrintWriter(outstream, true);
+
+            String response = in.readLine(); // received data from server saved in string
+            if (response.startsWith("WELCOME")) {
+                // the game is ready to be run
+                System.out.println("Starting Game");
+            }
+            // code to manage input and change state of game locally
+            while (playing) {
+                // if buffer is ready to be read
+                if (in.ready()) {
+                    response = in.readLine(); // save buffered input in response
+                    System.out.println(response);
+                    // code to handle position and implement new changes in playing field of game
+                    if (response.startsWith("POS")) {
+                        setPlayerPosition(map, response);
+                    }
+                    // code to handle position of opponent and implement new changes in playing
+                    // field of game
+                    if (response.startsWith("OPP")) {
+                        setOpponentPosition(map, response);
+                    }
+                    // code to handle opponent's score and implement new changes in playing field of
+                    // game
+                    if (response.startsWith("OSCO")) {
+                        map.p2.score = Integer.parseInt(response.split(",")[1]);
+                    }
+                    // code to handle any type of message, such as quit
+                    if (response.startsWith("MSG")) {
+                        map.message = response.split(",")[1];
+                    }
+                }
+                // read input from client and make movement in playing field
+                movementController();
+
+                // code to handle the game objective
+                // if all treasure picked up by players is 11, then game is over
+                if (map.p1.score + map.p2.score == 11) {
+                    playing = false; // game is over
+                    // if player1 one has more points
+                    if (map.p1.score > map.p2.score) {
+                        map.gameOver = "You win!!!";
+                        // if player2 has more points
+                    } else if (map.p1.score < map.p2.score) {
+                        map.gameOver = "You Lose!!";
+                        // if there is disconnection, game is over without any winners
+                    } else {
+                        map.gameOver = "Game ended on uncertain conditions";
+                    }
+                }
+                Thread.sleep(200);
+                map.printMap(); // update playing field of game as long as game is running
+            }
+        } catch (IOException | InterruptedException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
         }
 
     }
 
-    // Checks to see if a given movement can be made by the player
-    // No walking through walls and no going out of bounds
+    /*
+     * Set the position of a player in playing field after movement
+     * and send the new position to server
+     */
+    private static void setPlayerPosition(Map map, String pos) {
+        String[] args = pos.split(",");
+        int x = Integer.parseInt(args[1]);
+        int y = Integer.parseInt(args[2]);
+        map.setString(" ", map.getPlayerX(), map.getPlayerY());
+        map.p1.setPosX(x);
+        map.p1.setPosy(y);
+        map.setString("@", x, y);
+        out.println("NPOS" + "," + map.getPlayerX() + "," + map.getPlayerY());
+        map.printMap();
+    }
+
+    /*
+     * Set the position of opponent in playing field after movement
+     * and send new position to server
+     */
+    private static void setOpponentPosition(Map map, String pos) {
+        String[] args = pos.split(",");
+        int x = Integer.parseInt(args[1]);
+        int y = Integer.parseInt(args[2]);
+        map.setString(" ", map.p2.getX(), map.p2.getY());
+        map.p2.setPosX(x);
+        map.p2.setPosy(y);
+        map.setString("$", x, y);
+        map.printMap();
+    }
+
+    /*
+     * Return true if a move in playing field is possible or not
+     */
     public static boolean validMove(String move) {
-        int posX = level.getPlayerX();
-        int posY = level.getPlayerY();
-        int maxX = level.getMaxX();
-        int maxY = level.getMaxY();
+        int posX = map.getPlayerX();
+        int posY = map.getPlayerY();
+        int maxX = map.getMaxX();
+        int maxY = map.getMaxY();
+        String nextTile;
+        switch (move) {
+            case "right":
+                nextTile = map.getStringAt(posX + 1, posY);
+                break;
 
-        if (move.equals("right")) {
-            if (posX < maxX && !level.getStringAt(posX + 1, posY).equals("#")) {
-                return true;
-            }
-            return false;
-        } else if (move.equals("left")) {
-            if (posX > 0 && !level.getStringAt(posX - 1, posY).equals("#")) {
-                return true;
-            }
-            return false;
-        } else if (move.equals("down")) {
-            if (posY < maxY && !level.getStringAt(posX, posY + 1).equals("#")) {
-                return true;
-            }
-            return false;
-        } else {// move.equals("up")
-            if (posY > 0 && !level.getStringAt(posX, posY - 1).equals("#")) {
-                return true;
-            }
+            case "left":
+                nextTile = map.getStringAt(posX - 1, posY);
+                break;
+
+            case "down":
+                nextTile = map.getStringAt(posX, posY + 1);
+                break;
+
+            case "up":
+                nextTile = map.getStringAt(posX, posY - 1);
+                break;
+
+            default:
+                nextTile = "#";
+                break;
+        }
+        // if there is wall or another player, move is not valid
+        if (nextTile.equals("#") || nextTile.equals("$")) {
+            System.out.println("Wall or Enemy Found");
             return false;
         }
+        // if there is treasure, move is valid and score is increased
+        if (nextTile.equals("G")) {
+            map.p1.score++;
+            out.println("SCO" + "," + map.p1.score);
+            return true;
+        }
+        return true;
     }
 
-    public static void movementController(Screen screen) {
-        boolean stop = false;
-        while (!stop) {
-            Key key = screen.readInput();
-            while (key == null) {
-                key = screen.readInput();
-            }
-            // Move around with arrow keys in normal map view escape closes the application
+    /*
+     * Read keyboard input and perform movement in playing field
+     * 
+     */
+    public static void movementController() {
+        Key key = map.screen.readInput();
+
+        // Move around with arrow keys in normal map view escape closes the application
+        try {
             switch (key.getKind()) {
                 case Escape:
-                    stop = true;
+                    try {
+                        // if player wants to disconnect, ESC is pressed and socket is closed
+                        out.println("QUIT");
+                        out.flush();
+                        server.close();
+                        map.screen.stopScreen();
+                    } catch (IOException e) {
+                        // TODO Auto-generated catch block
+                        e.printStackTrace();
+                    }
                     break;
                 case ArrowRight:
                     if (validMove("right")) {
-                        level.movePlayerRight();
+                        setPlayerPosition(map, "POS" + "," + (map.p1.getX() + 1) + "," + map.p1.getY());
                     }
-                    level.PrintMap(screen);
                     break;
                 case ArrowLeft:
                     if (validMove("left")) {
-                        level.movePlayerLeft();
+                        setPlayerPosition(map, "POS" + "," + (map.p1.getX() - 1) + "," + map.p1.getY());
                     }
-                    level.PrintMap(screen);
                     break;
 
                 case ArrowDown:
                     if (validMove("down")) {
-                        level.movePlayerDown();
+                        setPlayerPosition(map, "POS" + "," + map.p1.getX() + "," + (map.p1.getY() + 1));
                     }
-                    level.PrintMap(screen);
                     break;
 
                 case ArrowUp:
                     if (validMove("up")) {
-                        level.movePlayerUp();
+                        setPlayerPosition(map, "POS" + "," + map.p1.getX() + "," + (map.p1.getY() - 1));
                     }
-                    level.PrintMap(screen);
                     break;
                 default:
                     break;
             }
+        } catch (NullPointerException e) {
+
         }
     }
 
-    public void start(Map map) throws FileNotFoundException {
-        Screen screen = TerminalFacade.createScreen();
-        screen.startScreen();
-        Game.startGame(screen, map);
-    }
-
-    /*
-     * public void addPlayer(PlayerGuide playerGuide, ClientThreads thread) {
-     * }
-     * 
-     * public void die(Player player) {
-     * }
-     * 
-     * public void playerleft(Player player) {
-     * }
-     * 
-     * public String getGoal() {
-     * return null;
-     * }
-     * 
-     * @Override
-     * public void run() {
-     * // TODO Auto-generated method stub
-     * 
-     * }
-     */
 }
