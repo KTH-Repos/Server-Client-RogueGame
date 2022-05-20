@@ -6,6 +6,13 @@
     "configurations": [
         {
             "type": "java",
+            "name": "Launch Server",
+            "request": "launch",
+            "mainClass": "Server",
+            "projectName": "tywe-INET_48c4c13f"
+        },
+        {
+            "type": "java",
             "name": "Launch ClientGUI",
             "request": "launch",
             "mainClass": "ClientGUI",

@@ -27,7 +27,7 @@ public class Game {
 
         try {
             server = new Socket(SERVER, PORT); // connect to server
-            gameLoop(server, map); // start game locally
+            gameLoop(server, map); // start game
         } catch (IOException e) {
             map.message = "Server Not Found Please Start Server and Restart Game";
             map.printMap();
@@ -86,12 +86,18 @@ public class Game {
                     // if player1 one has more points
                     if (map.p1.score > map.p2.score) {
                         map.gameOver = "You win!!!";
+                        Thread.sleep(500);
+                        server.close();
                         // if player2 has more points
                     } else if (map.p1.score < map.p2.score) {
                         map.gameOver = "You Lose!!";
+                        Thread.sleep(500);
+                        server.close();
                         // if there is disconnection, game is over without any winners
                     } else {
                         map.gameOver = "Game ended on uncertain conditions";
+                        Thread.sleep(500);
+                        server.close();
                     }
                 }
                 Thread.sleep(200);

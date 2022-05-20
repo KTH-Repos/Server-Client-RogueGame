@@ -183,7 +183,7 @@ public class Map {
         if (gameOver.equals("")) {
             screen.putString(getMaxX() / 2, 24, "Scores", Terminal.Color.WHITE, Terminal.Color.BLACK);
             screen.putString(getMaxX() / 2, 25, "You: " + p1.getScore(), Terminal.Color.WHITE, Terminal.Color.BLACK);
-            screen.putString(getMaxX() / 2, 26, "You Opponent: " + p2.getScore(), Terminal.Color.WHITE,
+            screen.putString(getMaxX() / 2, 26, "Your Opponent: " + p2.getScore(), Terminal.Color.WHITE,
                     Terminal.Color.BLACK);
         } else {
             screen.putString(getMaxX() / 2, 24, gameOver, Terminal.Color.RED, Terminal.Color.YELLOW);
